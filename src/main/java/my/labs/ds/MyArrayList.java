@@ -1,6 +1,5 @@
 package my.labs.ds;
 
-import java.util.Arrays;
 
 // Dynamic array implementation
 public class MyArrayList<E> {
