@@ -111,6 +111,13 @@ public class MyArrayList<E> {
         System.out.println(this);
     }
 
+    public E set(int index, E element) {
+        checkElementIndex(index);
+        E oldValue = data[index];
+        data[index] = element;
+        return oldValue;
+    }
+
     private void resize(int capacity) {
         E[] temp = (E[]) new Object[capacity];
         for (int i = 0; i < this.size; i++) {

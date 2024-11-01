@@ -66,8 +66,17 @@ public class MyArrayListTest {
         arrayList.removeLast();
         arrayList.removeLast();
         arrayList.print();
+    }
 
-
+    @Test
+    public void testSet() {
+        MyArrayList<Integer> array = new MyArrayList<>();
+        array.addLast(10);
+        array.addFirst(1);
+        array.print();
+       Integer oldValue =  array.set(1, 2);
+       Assert.assertEquals(10,oldValue.intValue());
+       array.print();
     }
 
 }
