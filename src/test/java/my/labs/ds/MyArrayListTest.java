@@ -1,6 +1,7 @@
 package my.labs.ds;
 
 
+import my.labs.ds.array.MyArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -74,9 +75,9 @@ public class MyArrayListTest {
         array.addLast(10);
         array.addFirst(1);
         array.print();
-       Integer oldValue =  array.set(1, 2);
-       Assert.assertEquals(10,oldValue.intValue());
-       array.print();
+        Integer oldValue = array.set(1, 2);
+        Assert.assertEquals(10, oldValue.intValue());
+        array.print();
     }
 
 }

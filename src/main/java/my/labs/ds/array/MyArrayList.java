@@ -1,4 +1,4 @@
-package my.labs.ds;
+package my.labs.ds.array;
 
 
 // Dynamic array implementation
