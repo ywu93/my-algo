@@ -21,4 +21,18 @@ public class LinkedListUtil {
         node.setNext(linkedList);
         return node;
     }
+
+    public static ListNode appendTail(ListNode list, ListNode node) {
+        ListNode tail = list;
+        while (tail.getNext() != null) {
+            tail = tail.getNext();
+        }
+        tail.setNext(node);
+        return tail.getNext();
+    }
+
+    public static ListNode insertNodeAtIndex(ListNode currentList, ListNode newNode, int index) {
+
+        return null;
+    }
 }
