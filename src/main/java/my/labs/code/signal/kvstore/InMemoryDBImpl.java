@@ -45,7 +45,7 @@ public class InMemoryDBImpl implements InMemoryDB {
         if (!store.containsKey(key)) {
             Map<String, TreeMap<Long,FieldValue>> fields = new HashMap<>();
             TreeMap<Long, FieldValue> fieldValues = new TreeMap<>();
-            fieldValues.put(timestamp, new FieldValue(value, timestamp, ttl));
+            fieldValues.put(timestamp, new FieldValue(field,value, timestamp, ttl));
             fields.put(field, fieldValues);
             store.put(key, fields);
             return;
@@ -61,7 +61,7 @@ public class InMemoryDBImpl implements InMemoryDB {
         } else {
             // Add new field
             TreeMap<Long, FieldValue> fieldValues = new TreeMap<>();
-            fieldValues.put(timestamp,  new FieldValue(value, timestamp, ttl));
+            fieldValues.put(timestamp,  new FieldValue(field,value, timestamp, ttl));
             fields.put(field, fieldValues);
         }
     }
