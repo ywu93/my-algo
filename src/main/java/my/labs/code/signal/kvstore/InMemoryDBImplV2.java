@@ -8,6 +8,8 @@ public class InMemoryDBImplV2 implements InMemoryDB {
 
     private final Map<String, Map<String, TreeMap<Long, FieldValue>>> storeWithTime = new HashMap<>();
 
+    private final Map<Long, Map<String,FieldValue>> backupsStore = new HashMap<>();
+
     /**
      * Should insert a field-value pair to the record associated with key.
      * If the field in the record already exists, replace the existing value
@@ -198,9 +200,44 @@ public class InMemoryDBImplV2 implements InMemoryDB {
 
     @Override
     public int backup(long timestamp) {
+        Map<String,FieldValue> backupFields = new HashMap<>();
+        for (Map.Entry<String, Map<String, TreeMap<Long, FieldValue>>> entry: storeWithTime.entrySet()){
+            Map<String, TreeMap<Long, FieldValue>> fields = entry.getValue();
+            if(fields == null || fields.isEmpty()){
+                continue;
+            }
+            for (Map.Entry<String,TreeMap<Long, FieldValue>> filedEntry: fields.entrySet()){
+                TreeMap<Long,FieldValue> filedValueMap = filedEntry.getValue();
+                if(filedValueMap == null || filedValueMap.isEmpty()){
+                    continue;
+                }
+                Map.Entry<Long,FieldValue> lastEntry = filedValueMap.floorEntry(timestamp);
+                if (lastEntry == null || lastEntry.getValue() == null){
+                    continue;
+                }
+                FieldValue fieldValue = lastEntry.getValue();
+                if(fieldValue.deleted || (fieldValue.expireAt != -1 && fieldValue.expireAt <= timestamp)){
+                    continue;
+                }
+                long remainingTtl = fieldValue.expireAt == -1 ? -1 : fieldValue.expireAt - timestamp;
+                FieldValue backUpField = new FieldValue(fieldValue.name, fieldValue.value, fieldValue.createdAt, fieldValue.updatedAt,fieldValue.ttl);
+                backUpField.remainingTtl = (int) remainingTtl;
+                backupFields.put(filedEntry.getKey(), backUpField);
+            }
+        }
+
+        if (!backupFields.isEmpty()) {
+            backupsStore.put(timestamp, backupFields);
+            return  backupFields.size();
+        }
         return 0;
     }
 
     @Override
     public void restore(long timestamp, long timestampToRestore) {}
+
+
+   public Map<Long, Map<String,FieldValue>> getBackupStore(){
+        return this.backupsStore;
+   }
 }
