@@ -9,7 +9,7 @@ public class InMemoryDBImplV2 implements InMemoryDB {
     private final Map<String, Map<String, TreeMap<Long, FieldValue>>> storeWithTime = new HashMap<>();
 
     // timestamp -> (key -> List<FieldValue>)
-    private final Map<Long, Map<String,List<FieldValue>>> backupsStore = new HashMap<>();
+    private final Map<Long, Map<String, List<FieldValue>>> backupsStore = new HashMap<>();
 
     /**
      * Should insert a field-value pair to the record associated with key.
@@ -108,7 +108,7 @@ public class InMemoryDBImplV2 implements InMemoryDB {
             return false;
         }
         FieldValue latest = entry.getValue();
-        if(latest == null) {
+        if (latest == null) {
             return false;
         }
         FieldValue deletedFieldValue = new FieldValue(latest.name, latest.value, latest.createdAt, timestamp, true);
@@ -131,10 +131,10 @@ public class InMemoryDBImplV2 implements InMemoryDB {
             return null;
         }
         FieldValue latest = entry.getValue();
-        if(latest == null) {
+        if (latest == null) {
             return null;
         }
-        if(latest.deleted || (latest.expireAt != -1 && latest.expireAt <= timestamp) ){
+        if (latest.deleted || (latest.expireAt != -1 && latest.expireAt <= timestamp)) {
             return null; // Field is deleted or expired
         }
         return latest.value;
@@ -147,16 +147,16 @@ public class InMemoryDBImplV2 implements InMemoryDB {
             return Collections.emptyList();
         }
         List<FieldValue> result = new ArrayList<>();
-        for(TreeMap<Long,FieldValue> fieldValue: fields.values()){
-            if (fieldValue == null || fieldValue.isEmpty()){
+        for (TreeMap<Long, FieldValue> fieldValue : fields.values()) {
+            if (fieldValue == null || fieldValue.isEmpty()) {
                 continue;
             }
-            Map.Entry<Long,FieldValue> entry = fieldValue.floorEntry(timestamp);
-            if(entry == null || entry.getValue() == null) {
+            Map.Entry<Long, FieldValue> entry = fieldValue.floorEntry(timestamp);
+            if (entry == null || entry.getValue() == null) {
                 continue;
             }
             FieldValue field = entry.getValue();
-            if (field.deleted || (field.expireAt != -1 && field.expireAt <= timestamp)){
+            if (field.deleted || (field.expireAt != -1 && field.expireAt <= timestamp)) {
                 continue;
             }
             result.add(field);
@@ -201,39 +201,39 @@ public class InMemoryDBImplV2 implements InMemoryDB {
 
     @Override
     public int backup(long timestamp) {
-        Map<String,List<FieldValue>> backupFields = new HashMap<>();
-        for (Map.Entry<String, Map<String, TreeMap<Long, FieldValue>>> entry: storeWithTime.entrySet()){
+        Map<String, List<FieldValue>> backupFields = new HashMap<>();
+        for (Map.Entry<String, Map<String, TreeMap<Long, FieldValue>>> entry : storeWithTime.entrySet()) {
             Map<String, TreeMap<Long, FieldValue>> fields = entry.getValue();
-            if(fields == null || fields.isEmpty()){
+            if (fields == null || fields.isEmpty()) {
                 continue;
             }
             List<FieldValue> fieldValueList = new ArrayList<>();
-            for (Map.Entry<String,TreeMap<Long, FieldValue>> filedEntry: fields.entrySet()){
-                TreeMap<Long,FieldValue> filedValueMap = filedEntry.getValue();
-                if(filedValueMap == null || filedValueMap.isEmpty()){
+            for (Map.Entry<String, TreeMap<Long, FieldValue>> filedEntry : fields.entrySet()) {
+                TreeMap<Long, FieldValue> filedValueMap = filedEntry.getValue();
+                if (filedValueMap == null || filedValueMap.isEmpty()) {
                     continue;
                 }
-                Map.Entry<Long,FieldValue> lastEntry = filedValueMap.floorEntry(timestamp);
-                if (lastEntry == null || lastEntry.getValue() == null){
+                Map.Entry<Long, FieldValue> lastEntry = filedValueMap.floorEntry(timestamp);
+                if (lastEntry == null || lastEntry.getValue() == null) {
                     continue;
                 }
                 FieldValue fieldValue = lastEntry.getValue();
-                if(fieldValue.deleted || (fieldValue.expireAt != -1 && fieldValue.expireAt <= timestamp)){
+                if (fieldValue.deleted || (fieldValue.expireAt != -1 && fieldValue.expireAt <= timestamp)) {
                     continue;
                 }
                 long remainingTtl = fieldValue.expireAt == -1 ? -1 : fieldValue.expireAt - timestamp;
-                FieldValue backUpField = new FieldValue(fieldValue.name, fieldValue.value, fieldValue.createdAt, fieldValue.updatedAt,fieldValue.ttl);
+                FieldValue backUpField = new FieldValue(
+                        fieldValue.name, fieldValue.value, fieldValue.createdAt, fieldValue.updatedAt, fieldValue.ttl);
                 backUpField.remainingTtl = (int) remainingTtl;
                 fieldValueList.add(backUpField);
             }
-            if (!fieldValueList.isEmpty()){
+            if (!fieldValueList.isEmpty()) {
                 backupFields.put(entry.getKey(), fieldValueList);
             }
-
         }
         if (!backupFields.isEmpty()) {
             backupsStore.put(timestamp, backupFields);
-            return  backupFields.size();
+            return backupFields.size();
         }
         return 0;
     }
@@ -259,8 +259,7 @@ public class InMemoryDBImplV2 implements InMemoryDB {
         }
     }
 
-
-   public Map<Long, Map<String,List<FieldValue>>> getBackupStore(){
+    public Map<Long, Map<String, List<FieldValue>>> getBackupStore() {
         return this.backupsStore;
-   }
+    }
 }
