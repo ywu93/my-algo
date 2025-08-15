@@ -40,31 +40,53 @@ public class InMemoryDBImplTest {
 
     @Test
     public void testBackupWithTtlAndDeleted() {
-        long t1 = 1000L;
-        long t2 = 2000L;
-        long t3 = 3000L;
+        // t = 1000: 插入一个没有 TTL 的字段
+        db2.setAt("user1", "name", "Alice", 1000);
 
-        // 添加记录
-        db2.setAt("user1", "name", "Alice", t1);
-        db2.setAtWithTtl("user1", "age", "30", t1, 5000); // TTL 5000ms
+        // t = 2000: 插入一个 TTL = 5000 的字段 (过期时间 7000)
+        db2.setAtWithTtl("user1", "age", "30", 2000, 5000);
 
-        // 删除 name
-        db2.deleteAt("user1", "name", t2);
+        // t = 2500: 再插入一个 TTL = 3000 的字段 (过期时间 5500)
+        db2.setAtWithTtl("user2", "city", "Vancouver", 2500, 3000);
 
-        // 再加一条记录
-        db2.setAt("user2", "score", "100", t3);
+        // t = 3000: 删除 user1.age
+        db2.deleteAt("user1", "age", 3000);
 
-        // 调用 backup
-        int backupCount = db2.backup(2500L); // timestamp 2500ms
-        assertEquals(1, backupCount); // 只有 age 没过期且未删除
+        // t = 4000: 调用 backup()
+        int count = db2.backup(4000);
 
-        // 检查 backupsStore
-        Map<String, FieldValue> backupFields = db2.getBackupStore().get(2500L);
-        assertNotNull(backupFields);
-        assertTrue(backupFields.containsKey("age")); // 只有 age 存在
-        assertFalse(backupFields.containsKey("name")); // name 被删除
-        FieldValue ageBackup = backupFields.get("age");
-        assertEquals(3500, ageBackup.remainingTtl); // 剩余 TTL = expireAt - timestamp
+        // 验证返回值
+        assertEquals(2, count); // 4000 时刻应该有 2 条有效记录 user1, user2
+
+        // 验证备份存储
+        Map<String, List<FieldValue>> backup = db2.getBackupStore().get(4000L);
+        assertNotNull(backup);//4000 时刻的备份不应为空
+
+        // user1.name
+        List<FieldValue> user1Fields = backup.get("user1");
+        assertNotNull(user1Fields);
+        assertEquals(1, user1Fields.size());
+        FieldValue nameField = user1Fields.get(0);
+        assertEquals("Alice", nameField.value);
+        assertEquals(-1, nameField.remainingTtl); // 无 TTL 记录的 remainingTtl 应为 -1
+
+        // user2.city
+        List<FieldValue> user2Fields = backup.get("user2");
+        assertNotNull(user2Fields);
+        assertEquals(1, user2Fields.size());
+        FieldValue cityField = user2Fields.get(0);
+        assertEquals("Vancouver", cityField.value);
+        assertEquals(1500, cityField.remainingTtl); //city 剩余 TTL 应该是 expireAt(5500) - timestamp(4000) = 1500
+
+        // t = 5000: 从 4000 的备份恢复
+        db2.restore(5000, 4000);
+
+        // 恢复后检查数据
+        assertEquals("Alice", db2.getAt("user1", "name", 5000)); // 永不过期
+        assertEquals("Vancouver", db2.getAt("user2", "city", 5000)); // TTL 还剩 1500
+
+        // 再模拟时间走到过期点 (6500)
+        assertNull(db2.getAt("user2", "city", 6500)); // 5000 + 1500 = 6500 过期
     }
     @Test
     public void testSetAndGet() {

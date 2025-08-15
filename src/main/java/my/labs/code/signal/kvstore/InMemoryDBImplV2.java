@@ -8,7 +8,8 @@ public class InMemoryDBImplV2 implements InMemoryDB {
 
     private final Map<String, Map<String, TreeMap<Long, FieldValue>>> storeWithTime = new HashMap<>();
 
-    private final Map<Long, Map<String,FieldValue>> backupsStore = new HashMap<>();
+    // timestamp -> (key -> List<FieldValue>)
+    private final Map<Long, Map<String,List<FieldValue>>> backupsStore = new HashMap<>();
 
     /**
      * Should insert a field-value pair to the record associated with key.
@@ -200,12 +201,13 @@ public class InMemoryDBImplV2 implements InMemoryDB {
 
     @Override
     public int backup(long timestamp) {
-        Map<String,FieldValue> backupFields = new HashMap<>();
+        Map<String,List<FieldValue>> backupFields = new HashMap<>();
         for (Map.Entry<String, Map<String, TreeMap<Long, FieldValue>>> entry: storeWithTime.entrySet()){
             Map<String, TreeMap<Long, FieldValue>> fields = entry.getValue();
             if(fields == null || fields.isEmpty()){
                 continue;
             }
+            List<FieldValue> fieldValueList = new ArrayList<>();
             for (Map.Entry<String,TreeMap<Long, FieldValue>> filedEntry: fields.entrySet()){
                 TreeMap<Long,FieldValue> filedValueMap = filedEntry.getValue();
                 if(filedValueMap == null || filedValueMap.isEmpty()){
@@ -222,10 +224,13 @@ public class InMemoryDBImplV2 implements InMemoryDB {
                 long remainingTtl = fieldValue.expireAt == -1 ? -1 : fieldValue.expireAt - timestamp;
                 FieldValue backUpField = new FieldValue(fieldValue.name, fieldValue.value, fieldValue.createdAt, fieldValue.updatedAt,fieldValue.ttl);
                 backUpField.remainingTtl = (int) remainingTtl;
-                backupFields.put(filedEntry.getKey(), backUpField);
+                fieldValueList.add(backUpField);
             }
-        }
+            if (!fieldValueList.isEmpty()){
+                backupFields.put(entry.getKey(), fieldValueList);
+            }
 
+        }
         if (!backupFields.isEmpty()) {
             backupsStore.put(timestamp, backupFields);
             return  backupFields.size();
@@ -234,10 +239,28 @@ public class InMemoryDBImplV2 implements InMemoryDB {
     }
 
     @Override
-    public void restore(long timestamp, long timestampToRestore) {}
+    public void restore(long timestamp, long timestampToRestore) {
+        Map<String, List<FieldValue>> backupFields = backupsStore.get(timestampToRestore);
+        if (backupFields == null || backupFields.isEmpty()) {
+            System.out.println("No backup availabe");
+            return;
+        }
+        // clean up the store first
+        storeWithTime.clear();
+        for (Map.Entry<String, List<FieldValue>> entry : backupFields.entrySet()) {
+            List<FieldValue> fieldValueList = entry.getValue();
+            for (FieldValue fieldValue : fieldValueList) {
+                if (fieldValue.remainingTtl != -1) {
+                    setAtWithTtl(entry.getKey(), fieldValue.name, fieldValue.value, timestamp, fieldValue.remainingTtl);
+                } else {
+                    setAt(entry.getKey(), fieldValue.name, fieldValue.value, timestamp);
+                }
+            }
+        }
+    }
 
 
-   public Map<Long, Map<String,FieldValue>> getBackupStore(){
+   public Map<Long, Map<String,List<FieldValue>>> getBackupStore(){
         return this.backupsStore;
    }
 }
