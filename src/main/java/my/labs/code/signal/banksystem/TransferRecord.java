@@ -4,12 +4,12 @@ public class TransferRecord {
     String fromAccountId;
     String toAccountId;
     int amount;
-    long transferTimestamp;
+    int occurredAt;
 
-    public TransferRecord(String fromAccountId,String toAccountId, int amount, long transferTimestamp) {
+    public TransferRecord(String fromAccountId,String toAccountId, int amount, int transferTimestamp) {
         this.fromAccountId = fromAccountId;
         this.toAccountId = toAccountId;
         this.amount = amount;
-        this.transferTimestamp = transferTimestamp;
+        this.occurredAt = transferTimestamp;
     }
 }

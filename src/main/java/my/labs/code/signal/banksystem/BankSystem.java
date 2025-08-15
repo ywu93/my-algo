@@ -30,7 +30,7 @@ public class BankSystem {
         return true;
     }
 
-    public boolean transfer (String fromAccountId, String toAccountId, int amount, long timestamp) {
+    public boolean transfer (String fromAccountId, String toAccountId, int amount, int timestamp) {
         boolean fromExisting = validateAccount(fromAccountId);
         boolean toExisting = validateAccount(toAccountId);
         boolean validAmount = amount > 0;
@@ -48,7 +48,7 @@ public class BankSystem {
     public List<String> topSenders(long timestamp, int n){
         Map<String,Integer> topSendersMap = new HashMap<>();
         for (TransferRecord record: transferRecordList){
-            if (record.transferTimestamp <= timestamp){
+            if (record.occurredAt <= timestamp){
                 topSendersMap.put(record.fromAccountId,
                         topSendersMap.getOrDefault(record.fromAccountId, 0) + record.amount);
             }
