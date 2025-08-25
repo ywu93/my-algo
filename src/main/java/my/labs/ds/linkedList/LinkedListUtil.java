@@ -44,11 +44,33 @@ public class LinkedListUtil {
         return currentList;
     }
 
-    public static void main(String[] args){
-        ListNode list = createLinkedList(new int[] {1,2,3,4,5});
-        list = insertAt(list,new ListNode(100),1);
-        for (ListNode p = list; p != null; p = p.next){
-            System.out.println(p.value);
+
+    public static ListNode mergeTowSortedList(ListNode list1, ListNode list2) {
+        ListNode dummy = new ListNode(-1);
+        ListNode current = dummy;
+        ListNode p1 = list1, p2 = list2;
+        while (p1 != null && p2!= null) {
+            if(p1.value < p2.value){
+                current.next = p1;
+                p1 = p1.next;
+            }else {
+                current.next = p2;
+                p2 = p2.next;
+            }
+            current = current.next;
         }
+        current.next = (p1 != null) ? p1 : p2;
+        return dummy.next;
+    }
+
+    public static void main(String[] args){
+        ListNode list1 = createLinkedList(new int[] {1,2,3,4,5});
+        ListNode list2 = createLinkedList(new int[] {4,6,8,10,18});
+        ListNode merged = mergeTowSortedList(list1,list2);
+        while (merged != null){
+            System.out.println(merged.value);
+            merged = merged.next;
+        }
+
     }
 }
