@@ -63,13 +63,75 @@ public class LinkedListUtil {
         return dummy.next;
     }
 
+
+    public static void traverseLink (ListNode node) {
+        if (node == null) {
+            return;
+        }
+        System.out.print(node.value + " ");
+        traverseLink(node.next);
+        System.out.print(node.value + " ");
+    }
+
+    /**
+     * iterative
+     * @param head
+     * @return
+     *
+     * 1 -> 2 ->3
+     * null <- 1  2->3
+     */
+    public static ListNode reversLink(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode prev, curr, next;
+        prev = null;
+        curr = head;
+        next = head.next;
+        while (curr != null){
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+            if (next != null) {
+                next = next.next;
+            }
+        }
+        return prev;
+    }
+
+    /**
+     * recursive reverse a link
+     * @param head
+     *
+     *
+     */
+    public static ListNode reverseLink2(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode last = reverseLink2(head.next);
+        head.next.next = head;
+        head.next = null;
+        return last;
+    }
+
+
+
     public static void main(String[] args){
-        ListNode list1 = createLinkedList(new int[] {1,2,3,4,5});
-        ListNode list2 = createLinkedList(new int[] {4,6,8,10,18});
-        ListNode merged = mergeTowSortedList(list1,list2);
-        while (merged != null){
-            System.out.println(merged.value);
-            merged = merged.next;
+//        ListNode list1 = createLinkedList(new int[] {1,2,3,4,5});
+//        ListNode list2 = createLinkedList(new int[] {4,6,8,10,18});
+//        ListNode merged = mergeTowSortedList(list1,list2);
+//        while (merged != null){
+//            System.out.println(merged.value);
+//            merged = merged.next;
+//        }
+
+        ListNode list = createLinkedList(new int[] {1,2,3,4,5,6,7,8,9});
+        ListNode reversed = LinkedListUtil.reversLink(list);
+        while (reversed != null){
+            System.out.println(reversed.value);
+            reversed = reversed.next;
         }
 
     }
