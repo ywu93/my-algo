@@ -1,5 +1,6 @@
 package my.labs.ds.linkedList;
 
+
 public class LinkedListUtil {
     public static ListNode createLinkedList(int[] array) {
         if (array == null || array.length == 0) {
