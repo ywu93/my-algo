@@ -1,6 +1,6 @@
 package my.labs.leetcode.array;
 
-public class SearchInsertPosition_lc35 {
+public class Lc35_SearchInsertPosition {
     // 左侧边界法二分搜索，搜索范围使用闭区间
     // Left-bound binary search using a closed interval [left, right]
     public static int searchInsert(int[] nums, int target) {
