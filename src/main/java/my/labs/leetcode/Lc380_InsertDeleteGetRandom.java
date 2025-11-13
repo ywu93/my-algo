@@ -2,7 +2,7 @@ package my.labs.leetcode;
 
 import java.util.*;
 
-public class InsertDeleteGetRandom_lc380 {
+public class Lc380_InsertDeleteGetRandom {
 
     private List<Integer> randomList = new ArrayList<>();
     private Map<Integer,Integer>  pos = new HashMap<>();
@@ -39,7 +39,7 @@ public class InsertDeleteGetRandom_lc380 {
     }
 
     public static void main(String[] args){
-        InsertDeleteGetRandom_lc380 randomSet = new InsertDeleteGetRandom_lc380();
+        Lc380_InsertDeleteGetRandom randomSet = new Lc380_InsertDeleteGetRandom();
         boolean result1 =  randomSet.insert(1);
         System.out.println(result1);
         boolean result2 = randomSet.insert(1);

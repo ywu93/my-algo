@@ -3,7 +3,7 @@ package my.labs.leetcode;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LRUCache_146 {
+public class Lc146_LRUCache {
     private Map<Integer, Node> cacheMap;
     private int capacity;
     private int size;
@@ -20,7 +20,7 @@ public class LRUCache_146 {
         }
     }
 
-    LRUCache_146 (int capacity) {
+    Lc146_LRUCache(int capacity) {
         this.capacity = capacity;
         this.cacheMap = new HashMap<>();
         this.size = 0;
@@ -85,7 +85,7 @@ public class LRUCache_146 {
     }
 
     public static void main(String[] args){
-        LRUCache_146 cache = new LRUCache_146(3);
+        Lc146_LRUCache cache = new Lc146_LRUCache(3);
         cache.put(1,1);
         cache.put(2,2);
         cache.get(1);

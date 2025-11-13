@@ -55,6 +55,55 @@ public class Lc20_ValidParentheses {
     }
 
     /**
+     * We iterate through each character in the string.
+     *
+     * <br>If it’s an opening bracket (like '(', '[', or '{'), we push it onto a stack.
+     *
+     * <br>If it’s a closing bracket (like ')', ']', or '}'), we check whether the stack is not empty and whether the top element matches the current closing bracket.
+     *
+     * <br>If it matches, we pop the top element from the stack.
+     *
+     * <br>If it doesn’t match or the stack is empty, the string is invalid, so we return false.
+     * <br>After we finish scanning all characters, the string is valid only if the stack is empty — meaning all opening brackets have been properly closed.
+     *
+     * <br>
+     * Time Complexity:
+     * O(n), where n is the length of the string — because we visit each character once.
+     * <br>
+     * Space Complexity:
+     * O(n) in the worst case — when all characters are opening brackets and we push all of them onto the stack.
+     *
+     * @param s
+     * @return
+     */
+    public static boolean isValid_stackVersion(String s) {
+       Stack<Character> leftStack = new Stack<>();
+       for (char c : s.toCharArray()) {
+          if (isOpenBracket(c)) {
+              leftStack.push(c);
+          } else {
+              if (!leftStack.isEmpty() && matchOpenBracket(c) == leftStack.peek()) {
+                  leftStack.pop();
+              } else {
+                  return false;
+              }
+          }
+       }
+       return leftStack.isEmpty();
+    }
+
+    private static boolean isOpenBracket (char c) {
+        return c == '(' || c == '[' || c == '{';
+    }
+
+    private static Character matchOpenBracket(char closeBracket) {
+        if (closeBracket == ')') return '(';
+        else if (closeBracket == ']') return '[';
+        else if (closeBracket == '}') return '{';
+        else return null;
+    }
+
+    /**
      * I maintain two counters:
      *
      * depth: the current nesting level of parentheses.
@@ -100,33 +149,61 @@ public class Lc20_ValidParentheses {
     }
 
     /**
-     * 计算括号序列的最大宽度（同一层同时出现的节点数）
+     *  I'm going to use a stack to simulate the nested structure.
+     *  <br> The stack store the node counts for each depth level
+     *  <br> I start by pushing a 0 as a virtual root, representing depth 0
+     *  <br> When I see an open round bracket, it means we're entering a new level:
+     *          <br>we pop the parent level count, increment it by 1, and push it back - meaning the parent just got
+     *          a new child.
+     *          <br> then, we push 0 for the new level's child count
+     *          <br> during this step, we also maintain maxBreadth with the parent's updated count.
+     *  <br> When I see a close bracket, it means the current level ends, maybe a temporary end - so I pop it off the stack
+     *  <br> but it's no necessarily the final end - we might later open anther sub-level at the same parent level.
+     *  <br> At the end, maxBreadth contains the maximum number of breadth at any level
+     *
+     * @param s
+     * @return
      */
     public static int calcMaxBreadth(String s) {
         Stack<Integer> stack = new Stack<>();
-        stack.push(0); // 栈底是虚拟根节点，代表深度 0 层
+        stack.push(0); // 虚拟根节点
+        int maxBreadth = 0;
 
-        int maxWidth = 0; // 最大宽度
-        // ()
+        System.out.println("=== Start calculating max breadth ===");
+        System.out.println("Input: " + s);
+        System.out.println("------------------------------------");
 
-        for (char c : s.toCharArray()) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+
             if (c == '(') {
-                // 遇到 '(' → 进入下一层
-                // 栈顶是当前父层（上一层）的节点计数
-                int parentCount = stack.pop() + 1; // 父层的节点数 +1
-                stack.push(parentCount);           // 更新父层计数
+                int parentCount = stack.pop() + 1; // 父层节点数 +1
+                stack.push(parentCount);
+                maxBreadth = Math.max(maxBreadth, parentCount);
+                stack.push(0); // 新层初始化为0
 
-                maxWidth = Math.max(maxWidth, parentCount); // 更新最大宽度
-
-                stack.push(0); // 当前层（新开层）的子节点计数初始化为 0
+                System.out.printf("[%d] '%c' → Enter new level | parentCount=%d, maxBreadth=%d, stack=%s%n",
+                        i, c, parentCount, maxBreadth, stack);
             } else if (c == ')') {
-                // 遇到 ')' → 当前层结束，弹出当前层计数
-                // 回到上一层（父层）继续处理
-                stack.pop();
+                if (!stack.isEmpty()) {
+                    int finishedLevel = stack.pop();
+                    System.out.printf("[%d] '%c' → Exit level | finishedLevelCount=%d, stackAfterPop=%s%n",
+                            i, c, finishedLevel, stack);
+                } else {
+                    System.out.printf("[%d] Warning: Unmatched ')' ignored.%n", i);
+                }
+            } else {
+                System.out.printf("[%d] Ignored char: '%c'%n", i, c);
             }
         }
 
-        return maxWidth; // 返回最大宽度
+        System.out.println("------------------------------------");
+        System.out.println("Final Result:");
+        System.out.println("Max Breadth = " + maxBreadth);
+        System.out.println("Final Stack = " + stack);
+        System.out.println("====================================");
+
+        return maxBreadth;
     }
 
 
@@ -146,6 +223,9 @@ public class Lc20_ValidParentheses {
 
 
         System.out.println(calcMaxBreadth("((()))"));
+        System.out.println(isValid_stackVersion("()[]{}"));
+        System.out.println(isValid_stackVersion("((){[]}"));
+        System.out.println((calcMaxBreadth("(()())(())")));
     }
 
 }
