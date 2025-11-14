@@ -81,12 +81,14 @@ public class Lc20_ValidParentheses {
        for (char c : s.toCharArray()) {
           if (isOpenBracket(c)) {
               leftStack.push(c);
-          } else {
-              if (!leftStack.isEmpty() && matchOpenBracket(c) == leftStack.peek()) {
-                  leftStack.pop();
-              } else {
+          } else if (isCloseBracket(c)) {
+              if (leftStack.isEmpty()) {
                   return false;
               }
+              if (leftStack.peek() != matchOpenBracket(c)) {
+                  return false;
+              }
+              leftStack.pop();
           }
        }
        return leftStack.isEmpty();
@@ -94,6 +96,9 @@ public class Lc20_ValidParentheses {
 
     private static boolean isOpenBracket (char c) {
         return c == '(' || c == '[' || c == '{';
+    }
+    private static boolean isCloseBracket (char c) {
+        return c == ')' || c == ']' || c == '}';
     }
 
     private static Character matchOpenBracket(char closeBracket) {
