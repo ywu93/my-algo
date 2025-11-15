@@ -16,7 +16,7 @@ public class Lc20_ValidParentheses {
      *
      * This function checks if a parentheses string is valid.
      *
-     * I use an integer depth to keep track of how many open parentheses '(' haven’t been closed yet.
+     * <br> I use an integer depth to keep track of how many open parentheses '(' haven’t been closed yet.
      *
      * As I iterate through the string:
      *
@@ -211,6 +211,55 @@ public class Lc20_ValidParentheses {
         return maxBreadth;
     }
 
+    public static boolean isValid_DFS(String s) {
+        return dfs(s, 0, new ArrayDeque<>());
+    }
+
+    private static boolean dfs(String s, int index, Deque<Character> stack) {
+        // 1. 走到末尾：只有栈空才算成功
+        if (index == s.length()) {
+            return stack.isEmpty();
+        }
+
+        char c = s.charAt(index);
+
+        // 2. 遇到开括号：选择入栈，然后继续 DFS
+        if (isOpen(c)) {
+            stack.push(c);
+            if (dfs(s, index + 1, stack)) return true;
+            stack.pop();                     // backtrack
+            return false;                    // 没有别的分支
+        }
+
+        // 3. 遇到闭括号：必须匹配栈顶
+        if (isClose(c)) {
+            if (!stack.isEmpty() && stack.peek() == match(c)) {
+                stack.pop();
+                if (dfs(s, index + 1, stack)) return true;
+                stack.push(match(c));        // backtrack
+            }
+            return false; // 不匹配 → 死路
+        }
+
+        // 4. 其他字符：直接跳过
+        return dfs(s, index + 1, stack);
+    }
+
+    private static boolean isOpen(char c) {
+        return c == '(' || c == '{' || c == '[';
+    }
+
+    private static boolean isClose(char c) {
+        return c == ')' || c == '}' || c == ']';
+    }
+
+    private static char match(char c) {
+        if (c == ')') return '(';
+        if (c == ']') return '[';
+        if (c == '}') return '{';
+        return '#';
+    }
+
 
 
     public static void main(String[] args){
@@ -231,6 +280,8 @@ public class Lc20_ValidParentheses {
         System.out.println(isValid_stackVersion("()[]{}"));
         System.out.println(isValid_stackVersion("((){[]}"));
         System.out.println((calcMaxBreadth("(()())(())")));
+
+        System.out.println(isValid_DFS("()[]{}"));
     }
 
 }
