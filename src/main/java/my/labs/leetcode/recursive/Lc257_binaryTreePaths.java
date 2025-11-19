@@ -5,6 +5,7 @@ import my.labs.ds.binarytree.TreeNode;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Lc257_binaryTreePaths {
     public List<String> binaryTreePaths(TreeNode root) {
         List<String> paths = new ArrayList<>();
